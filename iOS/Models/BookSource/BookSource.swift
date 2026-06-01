@@ -359,6 +359,29 @@ struct OnlineChapterRef: Identifiable, Codable {
     var runtimeVariables: [String: String]? = nil
 }
 
+extension OnlineChapterRef {
+    static func hasDegenerateURLs(in chapters: [OnlineChapterRef]?, tocURL: String?) -> Bool {
+        guard let chapters, chapters.count >= 3 else { return false }
+        let urls = chapters.map { normalizedURLKey($0.url) }.filter { !$0.isEmpty }
+        guard urls.count >= 3 else { return false }
+
+        let duplicateCount = Dictionary(grouping: urls, by: { $0 }).values.map(\.count).max() ?? 0
+        if Double(duplicateCount) / Double(urls.count) >= 0.8 {
+            return true
+        }
+
+        let tocKey = normalizedURLKey(tocURL)
+        return !tocKey.isEmpty && urls.prefix(3).allSatisfy { $0 == tocKey }
+    }
+
+    static func normalizedURLKey(_ raw: String?) -> String {
+        guard let raw, var components = URLComponents(string: raw) else { return "" }
+        components.fragment = nil
+        components.queryItems = components.queryItems?.sorted { $0.name < $1.name }
+        return (components.string ?? raw).lowercased()
+    }
+}
+
 extension BookSource {
     var usesLegadoRuntimeSession: Bool {
         !jsLib.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty

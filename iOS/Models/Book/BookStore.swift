@@ -1055,6 +1055,9 @@ class BookStore: ObservableObject, BookProvider {
                     if runtimeChanged || chaptersChanged || tocChanged || titleChanged || authorChanged {
                         self.saveMeta()
                     }
+                    if chaptersChanged || tocChanged {
+                        BookSourceFetcher.shared.clearAllChapterCache(bookId: bookId)
+                    }
                     onFirstChaptersReady?(self.books[idx])
                 }
             }
