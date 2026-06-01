@@ -1,7 +1,5 @@
 import Combine
-import FirebaseAuth
 import Foundation
-import GoogleSignIn
 import SwiftUI
 
 // MARK: - Reader Text Conversion
@@ -242,12 +240,8 @@ class GlobalSettings: ObservableObject {
     /// Subtitle shown under the account name. Prefers a real email, otherwise falls
     /// back to a provider description so we never display an opaque identifier.
     var accountSubtitle: String {
-        guard isLoggedIn else { return localized("登入後可管理帳號資料") }
         if !accountEmail.isEmpty { return accountEmail }
-        switch accountProvider {
-        case "Google": return localized("透過 Google 登入")
-        default: return localized("已登入")
-        }
+        return localized("本機個人資料")
     }
     @Published var accountAvatarData: Data? {
         didSet {
@@ -521,34 +515,6 @@ class GlobalSettings: ObservableObject {
         isLoggedIn = true
     }
 
-    @MainActor
-    func applyFirebaseUser(_ user: User?, providerOverride: String? = nil) {
-        guard let user else {
-            clearAccountState()
-            return
-        }
-
-        let email = user.email ?? ""
-        let displayName = user.displayName?.trimmingCharacters(in: .whitespacesAndNewlines)
-        accountDisplayName = displayName?.isEmpty == false ? displayName! : (email.isEmpty ? localized("已登入") : email)
-        accountEmail = email
-        accountProvider = providerOverride ?? Self.providerDisplayName(from: user)
-        accountUserIdentifier = user.uid
-        accountPhotoURL = user.photoURL?.absoluteString ?? accountPhotoURL
-        isLoggedIn = true
-    }
-
-    @MainActor
-    func applyFirebaseProfile(_ profile: UserProfile) {
-        accountDisplayName = profile.displayName
-        accountEmail = profile.email
-        accountProvider = profile.provider
-        accountUserIdentifier = profile.uid
-        accountPhotoURL = profile.photoURL ?? ""
-        isLoggedIn = true
-        profile.preferences.apply(to: self)
-    }
-
     func updateAccountAvatar(data: Data?) {
         accountAvatarData = data
     }
@@ -559,36 +525,6 @@ class GlobalSettings: ObservableObject {
         accountDisplayName = trimmed
     }
 
-    func signOut(
-        revokeGoogleAccess: Bool = false,
-        completion: ((Error?) -> Void)? = nil
-    ) {
-        let provider = accountProvider
-
-        guard provider == "Google" else {
-            clearAccountState()
-            completion?(nil)
-            return
-        }
-
-        if revokeGoogleAccess {
-            GIDSignIn.sharedInstance.disconnect { [weak self] error in
-                if error != nil {
-                    GIDSignIn.sharedInstance.signOut()
-                }
-                DispatchQueue.main.async {
-                    self?.clearAccountState()
-                    completion?(error)
-                }
-            }
-            return
-        }
-
-        GIDSignIn.sharedInstance.signOut()
-        clearAccountState()
-        completion?(nil)
-    }
-
     func clearAccountState() {
         isLoggedIn = false
         accountDisplayName = ""
@@ -597,16 +533,5 @@ class GlobalSettings: ObservableObject {
         accountUserIdentifier = ""
         accountPhotoURL = ""
         accountAvatarData = nil
-    }
-
-    private static func providerDisplayName(from user: User) -> String {
-        switch user.providerData.first?.providerID {
-        case "google.com":
-            return "Google"
-        case "password":
-            return "Email"
-        default:
-            return user.providerData.first?.providerID ?? "Firebase"
-        }
     }
 }

@@ -278,10 +278,6 @@ final class RSSStore: ObservableObject {
         articleStatuses[articleID]
     }
 
-    var firestoreArticleStatusesSnapshot: [RSSArticleStatus] {
-        Array(articleStatuses.values)
-    }
-
     func markRead(articleId: String, isRead: Bool) {
         var status = articleStatuses[articleId] ?? RSSArticleStatus(articleId: articleId)
         status.isRead = isRead

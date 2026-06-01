@@ -1167,24 +1167,6 @@ class BookStore: ObservableObject, BookProvider {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: workItem)
     }
 
-    func replaceBooksFromSync(_ syncedBooks: [ReadingBook]) {
-        // The synced copy omits `onlineChapters` (kept local & re-fetchable from the
-        // source) to stay under Firestore's 1 MB document limit. Preserve whatever the
-        // device already has so we don't drop a fetched table of contents.
-        let localChapters = Dictionary(books.map { ($0.id, $0.onlineChapters) }, uniquingKeysWith: { first, _ in first })
-        books = syncedBooks.map { book in
-            guard (book.onlineChapters?.isEmpty ?? true), let preserved = localChapters[book.id] ?? nil else {
-                return book
-            }
-            var merged = book
-            merged.onlineChapters = preserved
-            return merged
-        }.sorted { lhs, rhs in
-            (lhs.lastOpenedDate ?? lhs.addedDate) > (rhs.lastOpenedDate ?? rhs.addedDate)
-        }
-        saveMetaImmediately()
-    }
-
     private func saveMetaImmediately() {
         saveWorkItem?.cancel()
         guard let data = try? JSONEncoder().encode(books) else { return }

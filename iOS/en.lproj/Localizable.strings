@@ -481,11 +481,9 @@
 "請輸入您的 Email" = "Enter your email";
 "下一步" = "Next";
 "或使用以下方式" = "Or continue with";
-"使用 Google 帳號登錄" = "Continue with Google";
 "已有帳號？立即登錄" = "Already have an account? Sign in";
 "請輸入有效的 Email" = "Enter a valid email address";
 "無法取得登入視窗" = "Unable to open the sign-in window";
-"Google 登入失敗" = "Google sign-in failed";
 "Apple 登入失敗" = "Apple sign-in failed";
 "Apple 使用者" = "Apple User";
 "yuedu app 反饋" = "yuedu app Feedback";
@@ -505,8 +503,9 @@
 "登入後可跨設備同步書籍與進度" = "Sign in to sync books and progress across devices";
 "退出當前帳號" = "Sign out of this account";
 "個人資料" = "Profile";
+"本機個人資料" = "Local profile";
+"這些資料只儲存在本機。" = "This information is stored only on this device.";
 "登出帳號" = "Sign Out";
-"解除 Google 授權並登出" = "Revoke Google Access and Sign Out";
 "登出後此裝置會停止使用目前帳號同步。" = "This device will stop syncing with the current account after sign-out.";
 "刪除帳號" = "Delete Account";
 "永久刪除帳號" = "Permanently Delete Account";
@@ -520,7 +519,6 @@
 "修改用戶名" = "Edit User Name";
 "這個名稱只會顯示在此裝置上。" = "This name is only shown on this device.";
 "透過 Apple 登入" = "Signed in with Apple";
-"透過 Google 登入" = "Signed in with Google";
 "目前沒有文章" = "No articles yet";
 "重新載入" = "Reload";
 "RSS URL 無效" = "Invalid RSS URL";
@@ -770,7 +768,6 @@
 "電子郵件" = "Email";
 "請輸入密碼" = "Enter your password";
 "密碼至少需要 6 個字元" = "Password must be at least 6 characters";
-"Google 登入缺少身份憑證" = "Google sign-in is missing an identity token";
 "Apple 登入安全驗證失敗" = "Apple sign-in security verification failed";
 "Apple 登入缺少身份憑證" = "Apple sign-in is missing an identity token";
 "目前沒有已登入的帳號" = "No account is currently signed in";
@@ -786,7 +783,6 @@
 "已經有帳號了？前往登入" = "Already have an account? Sign in";
 "確認刪除帳號" = "Confirm Account Deletion";
 "請輸入密碼以確認刪除帳號" = "Enter your password to confirm account deletion";
-"此登入方式尚未在 Firebase 啟用，請在 Console 開啟對應的登入提供者" = "This sign-in method isn't enabled in Firebase. Enable the provider in the console.";
 "連結登入方式" = "Linked Sign-in Methods";
 "連結後可用任一方式登入同一個帳號" = "Once linked, you can sign in to the same account with any method.";
 "已連結" = "Linked";
