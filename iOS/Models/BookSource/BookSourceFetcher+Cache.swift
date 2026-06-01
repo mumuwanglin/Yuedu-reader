@@ -19,8 +19,10 @@ extension BookSourceFetcher {
         let path = tocPackagePath(tocUrl: tocUrl, source: source)
         guard let data = try? Data(contentsOf: path),
             let package = try? JSONDecoder().decode(TOCPackage.self, from: data),
-            normalizedURLKey(package.tocURL) == normalizedURLKey(tocUrl),
-            package.sourceId == source.id
+            OnlineChapterRef.normalizedURLKey(package.tocURL)
+                == OnlineChapterRef.normalizedURLKey(tocUrl),
+            package.sourceId == source.id,
+            !OnlineChapterRef.hasDegenerateURLs(in: package.chapters, tocURL: tocUrl)
         else {
             return nil
         }
@@ -31,7 +33,7 @@ extension BookSourceFetcher {
         let path = bookInfoPackagePath(url: url, source: source)
         guard let data = try? Data(contentsOf: path),
             let package = try? JSONDecoder().decode(BookInfoPackage.self, from: data),
-            normalizedURLKey(package.bookURL) == normalizedURLKey(url),
+            OnlineChapterRef.normalizedURLKey(package.bookURL) == OnlineChapterRef.normalizedURLKey(url),
             package.sourceId == source.id
         else {
             return nil
@@ -107,15 +109,8 @@ extension BookSourceFetcher {
 
     // MARK: - Private Helpers
 
-    private nonisolated func normalizedURLKey(_ raw: String?) -> String {
-        guard let raw, var components = URLComponents(string: raw) else { return "" }
-        components.fragment = nil
-        components.queryItems = components.queryItems?.sorted { $0.name < $1.name }
-        return (components.string ?? raw).lowercased()
-    }
-
     private nonisolated func tocCacheKey(tocUrl: String, source: BookSource) -> String {
-        let seed = "\(source.id.uuidString)|\(normalizedURLKey(tocUrl))"
+        let seed = "\(source.id.uuidString)|\(OnlineChapterRef.normalizedURLKey(tocUrl))"
         let digest = SHA256.hash(data: Data(seed.utf8))
         return digest.compactMap { String(format: "%02x", $0) }.joined()
     }
@@ -130,7 +125,7 @@ extension BookSourceFetcher {
     }
 
     private nonisolated func bookInfoCacheKey(url: String, source: BookSource) -> String {
-        let seed = "\(source.id.uuidString)|\(normalizedURLKey(url))"
+        let seed = "\(source.id.uuidString)|\(OnlineChapterRef.normalizedURLKey(url))"
         let digest = SHA256.hash(data: Data(seed.utf8))
         return digest.compactMap { String(format: "%02x", $0) }.joined()
     }

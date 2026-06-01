@@ -1054,21 +1054,30 @@ struct ReaderView: View {
             return
         }
 
+        let hasDegenerateChapters = OnlineChapterRef.hasDegenerateURLs(
+            in: currentBook.onlineChapters,
+            tocURL: currentBook.tocURL
+        )
         let needsRepair =
             (currentBook.bookSourceId != nil)
             && (
                 (currentBook.tocURL?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
                     || (currentBook.onlineChapters?.isEmpty != false)
                     || (currentBook.runtimeVariables?.isEmpty ?? true)
+                    || hasDegenerateChapters
             )
 
         guard needsRepair else {
             loadContent()
             return
         }
+        if hasDegenerateChapters {
+            dependencies.bookSourceFetcher.clearAllChapterCache(bookId: currentBook.id)
+        }
 
         // Bookshelf has chapters: open reader immediately, repair metadata in background.
-        if currentBook.onlineChapters?.isEmpty == false {
+        if currentBook.onlineChapters?.isEmpty == false,
+           !hasDegenerateChapters {
             loadContent()
             Task {
                 _ = try? await store.refreshOnlineBookMetadata(

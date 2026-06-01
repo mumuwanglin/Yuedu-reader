@@ -1,5 +1,6 @@
 import Foundation
 import CryptoKit
+import SwiftSoup
 
 // MARK: - Error
 
@@ -388,7 +389,12 @@ class ModernParserBridge {
                     var title = ReaderHTMLUtilities.displayText(
                         fromHTMLFragment: engine.getString(ruleStr: source.ruleToc.chapterName)
                     )
-                    let url = engine.getString(ruleStr: source.ruleToc.chapterUrl, isUrl: true)
+                    let url = elementScopedAttribute(
+                        rule: source.ruleToc.chapterUrl,
+                        html: ModernRuleEngine.toString(element),
+                        baseURL: baseURL,
+                        isUrl: true
+                    ) ?? engine.getString(ruleStr: source.ruleToc.chapterUrl, isUrl: true)
                     guard !title.isEmpty || !url.isEmpty else { continue }
 
                     let isVolumeStr = engine.getString(ruleStr: source.ruleToc.isVolume)
@@ -838,6 +844,45 @@ class ModernParserBridge {
     private static func parseBool(_ str: String) -> Bool {
         let lower = str.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         return lower == "true" || lower == "1" || lower == "yes"
+    }
+
+    private func elementScopedAttribute(
+        rule: String,
+        html: String,
+        baseURL: String,
+        isUrl: Bool
+    ) -> String? {
+        let attr = Self.bareAttributeName(from: rule)
+        guard !attr.isEmpty else { return nil }
+        guard let body = try? SwiftSoup.parseBodyFragment(html).body(),
+              let element = body.children().first() else {
+            return nil
+        }
+        let value = ((try? element.attr(attr)) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return nil }
+        return isUrl ? RuleEngine.resolveURL(value, base: baseURL) : value
+    }
+
+    private static func bareAttributeName(from rule: String) -> String {
+        let trimmed = rule.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return "" }
+        let lowered = trimmed.lowercased()
+        if lowered.hasPrefix("@") || lowered.hasPrefix("//") || lowered.hasPrefix("/") {
+            return ""
+        }
+        if trimmed.contains(".") || trimmed.contains("#") || trimmed.contains("[") || trimmed.contains("]") {
+            return ""
+        }
+        if lowered.hasPrefix("attr("), lowered.hasSuffix(")") {
+            let start = trimmed.index(trimmed.startIndex, offsetBy: 5)
+            let end = trimmed.index(before: trimmed.endIndex)
+            return String(trimmed[start..<end]).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        guard trimmed.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "-" || $0 == "_" }) else {
+            return ""
+        }
+        return trimmed
     }
 
     private static func encodingFromCharset(_ charset: String?) -> String.Encoding {
