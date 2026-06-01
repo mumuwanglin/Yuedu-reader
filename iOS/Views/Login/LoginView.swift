@@ -1,9 +1,10 @@
 import SwiftUI
-import GoogleSignIn
-import GoogleSignInSwift
 
 struct LoginView: View {
     @State private var email = ""
+    @State private var password = ""
+    @State private var emailMode: EmailAuthMode = .signIn
+    @State private var isLoading = false
     @State private var errorMessage: String?
     @Environment(\.dismiss) var dismiss
     @ObservedObject private var gs = GlobalSettings.shared
@@ -24,7 +25,7 @@ struct LoginView: View {
                     Text(localized("歡迎回來"))
                         .font(.largeTitle.bold())
 
-                    Text(localized("新用戶註冊將在驗證後自動創建帳號"))
+                    Text(localized("使用帳號同步書庫、進度與偏好"))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -40,7 +41,7 @@ struct LoginView: View {
 
                 VStack(spacing: 20) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(localized("電子郵件或帳號"))
+                        Text(localized("電子郵件"))
                             .font(.caption.bold())
                             .foregroundColor(.secondary)
 
@@ -53,18 +54,37 @@ struct LoginView: View {
                             .cornerRadius(12)
                     }
 
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(localized("密碼"))
+                            .font(.caption.bold())
+                            .foregroundColor(.secondary)
+
+                        SecureField(localized("請輸入密碼"), text: $password)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .padding()
+                            .background(Color.secondary.opacity(0.1))
+                            .cornerRadius(12)
+                    }
+
                     Button {
                         signInWithEmail()
                     } label: {
-                        Text(localized("下一步"))
+                        HStack {
+                            if isLoading {
+                                ProgressView()
+                                    .tint(.white)
+                            }
+                            Text(localized(emailMode.primaryButtonTitle))
+                        }
                             .bold()
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(email.isEmpty ? Color.gray : Color.blue)
+                            .background(!canSubmitEmail || isLoading ? Color.gray : Color.blue)
                             .cornerRadius(12)
                     }
-                    .disabled(email.isEmpty)
+                    .disabled(!canSubmitEmail || isLoading)
 
                     if let errorMessage {
                         Text(errorMessage)
@@ -103,19 +123,30 @@ struct LoginView: View {
                                     .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
                             )
                         }
+                        .disabled(isLoading)
                     }
                 }
 
                 Spacer()
 
-                Button(localized("已有帳號？立即登錄")) {
-                    signInWithEmail()
+                Button {
+                    withAnimation { emailMode.toggle() }
+                    errorMessage = nil
+                } label: {
+                    Text(localized(emailMode.togglePrompt))
+                        .font(.footnote.bold())
+                        .foregroundColor(.blue)
                 }
-                .font(.footnote)
-                .foregroundColor(.blue)
+                .disabled(isLoading)
+                .padding(.bottom, 8)
             }
             .padding(.horizontal, 24)
         }
+    }
+
+    private var canSubmitEmail: Bool {
+        !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        && password.count >= 6
     }
 
     private func signInWithEmail() {
@@ -125,15 +156,27 @@ struct LoginView: View {
             errorMessage = localized("請輸入有效的 Email")
             return
         }
+        guard password.count >= 6 else {
+            errorMessage = localized("密碼至少需要 6 個字元")
+            return
+        }
 
         errorMessage = nil
-        gs.signIn(
-            displayName: normalizedEmail,
-            email: normalizedEmail,
-            provider: "Email",
-            userIdentifier: normalizedEmail
-        )
-        completeSignIn()
+        isLoading = true
+        Task {
+            do {
+                switch emailMode {
+                case .signIn:
+                    _ = try await FirebaseAuthManager.shared.signInWithEmail(email: normalizedEmail, password: password)
+                case .signUp:
+                    _ = try await FirebaseAuthManager.shared.signUpWithEmail(email: normalizedEmail, password: password)
+                }
+                completeSignIn()
+            } catch {
+                errorMessage = AuthErrorReporter.describe(error)
+            }
+            isLoading = false
+        }
     }
 
     private func handleGoogleSignIn() {
@@ -143,40 +186,47 @@ struct LoginView: View {
             return
         }
 
-        GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { signInResult, error in
-            if let error {
-                DispatchQueue.main.async {
-                    errorMessage = error.localizedDescription
-                }
-                return
-            }
-
-            guard let result = signInResult else {
-                DispatchQueue.main.async {
-                    errorMessage = localized("Google 登入失敗")
-                }
-                return
-            }
-
-            let profile = result.user.profile
-            let email = profile?.email ?? result.user.userID ?? ""
-            let name = profile?.name ?? email
-
-            DispatchQueue.main.async {
-                gs.signIn(
-                    displayName: name,
-                    email: email,
-                    provider: "Google",
-                    userIdentifier: result.user.userID ?? email
-                )
+        errorMessage = nil
+        isLoading = true
+        Task {
+            do {
+                _ = try await FirebaseAuthManager.shared.signInWithGoogle(presenting: rootViewController)
                 completeSignIn()
+            } catch {
+                errorMessage = AuthErrorReporter.describe(error)
             }
+            isLoading = false
         }
     }
 
     private func completeSignIn() {
+        // The auth-state listener triggers the Firestore sync once the session is live.
         onSignedIn()
         dismiss()
+    }
+}
+
+private enum EmailAuthMode: String {
+    case signIn
+    case signUp
+
+    var primaryButtonTitle: String {
+        switch self {
+        case .signIn: return "登入"
+        case .signUp: return "註冊"
+        }
+    }
+
+    /// Small blue link at the bottom that flips the form to the other mode.
+    var togglePrompt: String {
+        switch self {
+        case .signIn: return "還沒有帳號？立即註冊"
+        case .signUp: return "已經有帳號了？前往登入"
+        }
+    }
+
+    mutating func toggle() {
+        self = self == .signIn ? .signUp : .signIn
     }
 }
 
