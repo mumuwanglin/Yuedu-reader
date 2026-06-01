@@ -57,8 +57,8 @@ struct SystemTTSEngineTests {
         #expect(SystemTTSEngine.preferredLanguage(for: "今天天氣很好").hasPrefix("zh"))
     }
 
-    @Test func chineseLanguageDistinguishesScriptVariant() {
-        let lang = SystemTTSEngine.preferredLanguage(for: "繁體中文")
-        #expect(lang == "zh-TW" || lang == "zh-CN")
+    @Test func chineseLanguageDefaultsToSimplifiedChinese() {
+        let lang = SystemTTSEngine.preferredLanguage(for: "简体中文")
+        #expect(lang == "zh-CN")
     }
 }

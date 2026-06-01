@@ -420,7 +420,6 @@
 "上下" = "Vertical";
 "閱讀方式" = "Reading Mode";
 "原文" = "Original";
-"繁體" = "Traditional";
 "简体" = "Simplified";
 "翻頁" = "Page Turn";
 "滑動" = "Slide";
@@ -774,7 +773,7 @@
 "Google 登入缺少身份憑證" = "Google sign-in is missing an identity token";
 "Apple 登入安全驗證失敗" = "Apple sign-in security verification failed";
 "Apple 登入缺少身份憑證" = "Apple sign-in is missing an identity token";
-"目前沒有已登入的" = "No account is currently signed in";
+"目前沒有已登入的帳號" = "No account is currently signed in";
 "為了保護帳號安全，請重新登入後再刪除帳號" = "For account security, sign in again before deleting your account.";
 "等待同步" = "Waiting to sync";
 "正在同步" = "Syncing";

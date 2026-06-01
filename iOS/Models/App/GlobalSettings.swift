@@ -8,7 +8,6 @@ import SwiftUI
 
 enum TextConversion: String, CaseIterable {
     case original = "原文"
-    case toTraditional = "繁體"
     case toSimplified = "简体"
 }
 
@@ -203,9 +202,6 @@ extension String {
     func converted(to mode: TextConversion) -> String {
         switch mode {
         case .original: return self
-        case .toTraditional:
-            return self.applyingTransform(StringTransform(rawValue: "Hans-Hant"), reverse: false)
-                ?? self
         case .toSimplified:
             return self.applyingTransform(StringTransform(rawValue: "Hant-Hans"), reverse: false)
                 ?? self

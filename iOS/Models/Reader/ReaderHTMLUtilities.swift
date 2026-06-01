@@ -330,7 +330,7 @@ enum ReaderHTMLUtilities {
     static func normalizedChapterHTML(
         title: String,
         paragraphs: [String],
-        language: String = "zh-Hant"
+        language: String = "zh-Hans"
     ) -> String {
         let trimmedTitle = displayText(fromHTMLFragment: title)
         let escapedTitle = escapeHTML(trimmedTitle.isEmpty ? "Untitled" : trimmedTitle)

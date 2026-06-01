@@ -47,8 +47,7 @@ yuedu app/
 ├── ViewModels/       # ObservableObject view models
 ├── Assets/           # Asset catalog and book source engine JS
 ├── en.lproj/         # English localization
-├── zh-Hans.lproj/    # Simplified Chinese localization
-└── zh-Hant.lproj/    # Traditional Chinese localization
+└── zh-Hans.lproj/    # Simplified Chinese localization
 ```
 
 ## Reader Pipeline
@@ -92,7 +91,7 @@ BookSourceFetcher.searchBooks()
 - **Reading position identity**: Use `(spineIndex, charOffset)` not `globalPage`. Pages shift when chapters load.
 - **Margin flow**: `GlobalSettings.pageMarginH/V` → `currentContentInsets()` → `CoreTextPaginator.paginate(contentInsets:)` → `ChapterLayout.contentInsets` → `CoreTextPageView.draw()`
 - **Dependency injection**: `AppDependencies` + `@Environment` for services; singletons for caches
-- **Localization**: All UI strings via `localized()`; keys in zh-Hant, zh-Hans, en
+- **Localization**: All UI strings via `localized()`; keys in zh-Hans and en
 
 ## Dependencies
 
