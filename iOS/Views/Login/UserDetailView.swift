@@ -1,4 +1,3 @@
-import CloudKit
 import SwiftUI
 import PhotosUI
 import UIKit
@@ -6,7 +5,6 @@ import UIKit
 struct UserDetailView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var gs = GlobalSettings.shared
-    @StateObject private var iCloudSync = ICloudSyncManager.shared
     @State private var showLogin = false
     @State private var selectedAvatarItem: PhotosPickerItem?
     @State private var avatarErrorMessage: String?
@@ -33,24 +31,8 @@ struct UserDetailView: View {
                     }
 
                     VStack(spacing: 8) {
-                        HStack(spacing: 4) {
-                            Image(systemName: syncStatusIcon)
-                            Text(iCloudSync.statusTitle(isAppSignedIn: gs.isLoggedIn))
-                                .font(.system(size: 12, weight: .semibold))
-                        }
-                        .padding(.horizontal, 12).padding(.vertical, 6)
-                        .background(syncStatusColor.opacity(0.1))
-                        .foregroundColor(syncStatusColor)
-                        .clipShape(Capsule())
-
-                        if gs.isLoggedIn, let date = iCloudSync.lastSyncDate {
-                            Text("\(localized("上次同步")) \(date.formatted(date: .abbreviated, time: .shortened))")
-                                .font(.system(size: 10))
-                                .foregroundColor(.secondary)
-                        }
-
                         if !gs.isLoggedIn {
-                            Text(localized("登入後可跨設備同步書籍與進度"))
+                            Text(localized("登入後可管理帳號資料"))
                                 .font(.system(size: 10))
                                 .foregroundColor(.secondary)
 
@@ -137,7 +119,7 @@ struct UserDetailView: View {
 
                         Button(localized("取消"), role: .cancel) {}
                     } message: {
-                        Text(localized("登出後此裝置會停止使用目前帳號同步。"))
+                        Text(localized("登出後此裝置會停止使用目前帳號。"))
                     }
                 }
 
@@ -165,7 +147,7 @@ struct UserDetailView: View {
 
                         Button(localized("取消"), role: .cancel) {}
                     } message: {
-                        Text(localized("刪除帳號將登出此裝置，並永久刪除已同步至 iCloud 的書庫、書源與替換規則資料。此操作無法復原。"))
+                        Text(localized("刪除帳號將登出此裝置並移除本機登入資訊。此操作無法復原。"))
                     }
 
                     if let deleteAccountErrorMessage {
@@ -174,7 +156,7 @@ struct UserDetailView: View {
                             .foregroundColor(.red)
                     }
                 } footer: {
-                    Text(localized("刪除帳號會移除您的登入資訊並清除已上傳至 iCloud 的同步資料，且無法復原。儲存在本機的書籍不會被刪除。"))
+                    Text(localized("刪除帳號會移除您的登入資訊，且無法復原。儲存在本機的書籍不會被刪除。"))
                 }
             }
         }
@@ -201,28 +183,6 @@ struct UserDetailView: View {
                 await updateAvatar(from: newItem)
             }
         }
-        .task {
-            if gs.isLoggedIn {
-                _ = await iCloudSync.refreshAccountStatus()
-            }
-        }
-    }
-
-    private var syncStatusIcon: String {
-        guard gs.isLoggedIn else { return "icloud.slash" }
-        return iCloudSync.accountStatus == .available ? "icloud.fill" : "exclamationmark.icloud"
-    }
-
-    private var syncStatusColor: Color {
-        guard gs.isLoggedIn else { return .blue }
-        switch iCloudSync.accountStatus {
-        case .available:
-            return .blue
-        case .noAccount, .restricted, .temporarilyUnavailable:
-            return .orange
-        default:
-            return .secondary
-        }
     }
 
     private func performSignOut(revokeGoogleAccess: Bool) {
@@ -238,23 +198,9 @@ struct UserDetailView: View {
         deleteAccountErrorMessage = nil
         let revokeGoogleAccess = gs.accountProvider == "Google"
 
-        Task {
-            do {
-                try await iCloudSync.deleteRemoteData()
-            } catch {
-                await MainActor.run {
-                    isDeletingAccount = false
-                    deleteAccountErrorMessage = error.localizedDescription
-                }
-                return
-            }
-
-            await MainActor.run {
-                gs.signOut(revokeGoogleAccess: revokeGoogleAccess) { _ in
-                    isDeletingAccount = false
-                    dismiss()
-                }
-            }
+        gs.signOut(revokeGoogleAccess: revokeGoogleAccess) { _ in
+            isDeletingAccount = false
+            dismiss()
         }
     }
 

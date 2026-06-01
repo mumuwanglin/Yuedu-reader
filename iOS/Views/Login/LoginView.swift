@@ -1,5 +1,4 @@
 import SwiftUI
-import AuthenticationServices
 import GoogleSignIn
 import GoogleSignInSwift
 
@@ -104,15 +103,6 @@ struct LoginView: View {
                                     .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
                             )
                         }
-
-                        SignInWithAppleButton(.continue) { request in
-                            request.requestedScopes = [.fullName, .email]
-                        } onCompletion: { result in
-                            handleAppleSignIn(result)
-                        }
-                            .signInWithAppleButtonStyle(.black)
-                            .frame(height: 48)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                 }
 
@@ -184,62 +174,9 @@ struct LoginView: View {
         }
     }
 
-    private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
-        switch result {
-        case .success(let authorization):
-            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
-                errorMessage = localized("Apple 登入失敗")
-                return
-            }
-
-            let formatter = PersonNameComponentsFormatter()
-            let name = credential.fullName.flatMap { formatter.string(from: $0).trimmingCharacters(in: .whitespacesAndNewlines) } ?? ""
-            let previousAppleUser = gs.accountProvider == "Apple" && gs.accountUserIdentifier == credential.user
-            let persistedName = previousAppleUser ? gs.accountDisplayName : ""
-            let persistedEmail = previousAppleUser ? gs.accountEmail : ""
-            let displayName = !name.isEmpty ? name : (!persistedName.isEmpty ? persistedName : localized("Apple 使用者"))
-            // Apple only returns the email on the first authorization. Fall back to the
-            // previously stored email when available, but never expose the opaque user
-            // identifier (credential.user) as if it were an email address.
-            let email = credential.email ?? (!persistedEmail.isEmpty ? persistedEmail : "")
-            gs.signIn(
-                displayName: displayName,
-                email: email,
-                provider: "Apple",
-                userIdentifier: credential.user
-            )
-            completeSignIn()
-        case .failure(let error):
-            errorMessage = appleAuthorizationMessage(for: error)
-            return
-        }
-    }
-
     private func completeSignIn() {
         onSignedIn()
-        ICloudSyncManager.shared.syncAfterSignIn()
         dismiss()
-    }
-
-    private func appleAuthorizationMessage(for error: Error) -> String {
-        guard let authorizationError = error as? ASAuthorizationError else {
-            return error.localizedDescription
-        }
-
-        switch authorizationError.code {
-        case .canceled:
-            return localized("已取消 Apple 登錄")
-        case .failed:
-            return localized("Apple 登錄失敗，請稍後再試")
-        case .invalidResponse:
-            return localized("Apple 登錄回應無效")
-        case .notHandled:
-            return localized("Apple 登錄未完成，請重試")
-        case .unknown:
-            return localized("無法完成 Apple 登錄，請確認已開啟 Sign in with Apple 並使用支援的 Apple ID")
-        default:
-            return localized("Apple 登錄失敗")
-        }
     }
 }
 
