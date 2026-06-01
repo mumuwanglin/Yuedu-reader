@@ -16,7 +16,7 @@ Thanks for contributing! Here is how to get started.
 ## Code Conventions
 
 - **SwiftUI views**: Use `DSColor`, `DSFont`, `DSSpacing` design tokens.
-- **Localization**: Every user-facing string must use `localized("Key")`. Add the key to all three `.lproj/Localizable.strings` files.
+- **Localization**: Every user-facing string must use `localized("Key")`. Add the key to both supported `.lproj/Localizable.strings` files.
 - **Models vs Views**: Keep layout/rendering code in `Views/`. Data types and stores go in `Models/`.
 - **Singletons**: Prefer dependency injection via `@Environment` and `AppDependencies`. Only use singletons for caches and shared managers.
 - **File size**: Split files that exceed ~800 lines. Extract reusable components.
@@ -30,7 +30,7 @@ Yuedu has several contribution areas that do not require working on the renderin
 - UI polish: SwiftUI screens, Settings, Library, Table of Contents, reader controls.
 - Documentation: README, screenshots, usage notes, EPUB compatibility notes.
 - EPUB testing: try different EPUB files and report rendering issues with screenshots.
-- Localization: improve Traditional Chinese, Simplified Chinese, and English strings.
+- Localization: improve Simplified Chinese and English strings.
 - Sync and import workflows: WebDAV, OPDS, file import, and error messages.
 - Accessibility: VoiceOver labels, Dynamic Type, contrast, and larger touch targets.
 

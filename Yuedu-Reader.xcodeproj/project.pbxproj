@@ -445,12 +445,11 @@
 				};
 			};
 			buildConfigurationList = 460D36542F51C5B8006E774C /* Build configuration list for PBXProject "Yuedu-Reader" */;
-			developmentRegion = "zh-Hant";
+			developmentRegion = "zh-Hans";
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
-				"zh-Hant",
 				"zh-Hans",
 			);
 			mainGroup = 460D36502F51C5B8006E774C;

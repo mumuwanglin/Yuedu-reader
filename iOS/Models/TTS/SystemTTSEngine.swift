@@ -223,18 +223,8 @@ final class SystemTTSEngine: NSObject, TTSPlayable, @unchecked Sendable {
         return AVSpeechSynthesisVoice.currentLanguageCode()
     }
 
-    /// Picks Traditional vs. Simplified Chinese based on the user's preferred languages,
-    /// matching the app's own zh-Hant / zh-Hans localization.
+    /// Chinese UI/localization defaults to Simplified Chinese.
     private static func preferredChineseLanguage() -> String {
-        for code in Locale.preferredLanguages {
-            let lower = code.lowercased()
-            if lower.hasPrefix("zh-hant") || lower.contains("-tw") || lower.contains("-hk") || lower.contains("-mo") {
-                return "zh-TW"
-            }
-            if lower.hasPrefix("zh") {
-                return "zh-CN"
-            }
-        }
         return "zh-CN"
     }
 

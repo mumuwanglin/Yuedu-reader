@@ -4,11 +4,11 @@ import Testing
 
 @Suite("GlobalSettings Localization", .serialized)
 struct GlobalSettingsLocalizationTests {
-    @Test("traditional chinese returns source string")
-    func traditionalChineseReturnsSourceString() {
-        let translated = localized("書架", bundle: testBundle(localizations: ["zh-Hant"]))
+    @Test("simplified chinese returns localized string")
+    func simplifiedChineseReturnsLocalizedString() {
+        let translated = localized("書架", bundle: testBundle(localizations: ["zh-Hans"]))
 
-        #expect(translated == "書架")
+        #expect(translated == "书架")
     }
 
     @Test("english localized string comes from bundle")
@@ -31,7 +31,7 @@ struct GlobalSettingsLocalizationTests {
         #expect(translated == "不存在的字串")
     }
 
-    private func testBundle(localizations: [String] = ["en", "zh-Hant"]) -> Bundle {
+    private func testBundle(localizations: [String] = ["en", "zh-Hans"]) -> Bundle {
         let rootURL = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
             .appendingPathExtension("bundle")
@@ -55,7 +55,7 @@ struct GlobalSettingsLocalizationTests {
             <key>CFBundleShortVersionString</key>
             <string>1.0</string>
             <key>CFBundleDevelopmentRegion</key>
-            <string>\(localizations.first ?? "zh-Hant")</string>
+            <string>\(localizations.first ?? "zh-Hans")</string>
             <key>CFBundleLocalizations</key>
             <array>
                 \(localizations.map { "<string>\($0)</string>" }.joined(separator: "\n        "))
@@ -70,8 +70,9 @@ struct GlobalSettingsLocalizationTests {
             "書架" = "Library";
             "系統語言提示" = "System language hint";
             """,
-            "zh-Hant": """
-            "系統語言提示" = "系統語言提示";
+            "zh-Hans": """
+            "書架" = "书架";
+            "系統語言提示" = "系统语言提示";
             """
         ]
 

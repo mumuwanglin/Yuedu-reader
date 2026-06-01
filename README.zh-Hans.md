@@ -11,7 +11,6 @@
 
 <p align="center">
   <a href="README.zh-Hans.md">简体中文</a> ·
-  <a href="README.zh-Hant.md">繁體中文</a> ·
   <a href="README.md">English</a>
 </p>
 
@@ -195,7 +194,7 @@ iOS/
 ├── Views/                # SwiftUI 界面
 ├── ViewModels/           # ObservableObject ViewModel
 ├── Assets/               # 资产目录与规则引擎资源
-└── *.lproj/              # 本地化：zh-Hant、zh-Hans、en
+└── *.lproj/              # 本地化：zh-Hans、en
 ```
 
 ## 开发
