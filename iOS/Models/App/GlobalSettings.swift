@@ -242,10 +242,9 @@ class GlobalSettings: ObservableObject {
     /// Subtitle shown under the account name. Prefers a real email, otherwise falls
     /// back to a provider description so we never display an opaque identifier.
     var accountSubtitle: String {
-        guard isLoggedIn else { return localized("登入後可同步進度") }
+        guard isLoggedIn else { return localized("登入後可管理帳號資料") }
         if !accountEmail.isEmpty { return accountEmail }
         switch accountProvider {
-        case "Apple": return localized("透過 Apple 登入")
         case "Google": return localized("透過 Google 登入")
         default: return localized("已登入")
         }
@@ -604,8 +603,6 @@ class GlobalSettings: ObservableObject {
         switch user.providerData.first?.providerID {
         case "google.com":
             return "Google"
-        case "apple.com":
-            return "Apple"
         case "password":
             return "Email"
         default:

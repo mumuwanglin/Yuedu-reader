@@ -1,5 +1,4 @@
 import SwiftUI
-import AuthenticationServices
 
 struct LoginView: View {
     @State private var email = ""
@@ -125,16 +124,6 @@ struct LoginView: View {
                             )
                         }
                         .disabled(isLoading)
-
-                        SignInWithAppleButton(.continue) { request in
-                            FirebaseAuthManager.shared.prepareAppleRequest(request)
-                        } onCompletion: { result in
-                            handleAppleSignIn(result)
-                        }
-                            .signInWithAppleButtonStyle(.black)
-                            .frame(height: 48)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .disabled(isLoading)
                     }
                 }
 
@@ -210,56 +199,10 @@ struct LoginView: View {
         }
     }
 
-    private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
-        switch result {
-        case .success(let authorization):
-            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
-                errorMessage = localized("Apple 登入失敗")
-                return
-            }
-
-            errorMessage = nil
-            isLoading = true
-            Task {
-                do {
-                    _ = try await FirebaseAuthManager.shared.signInWithApple(credential: credential)
-                    completeSignIn()
-                } catch {
-                    errorMessage = AuthErrorReporter.describe(error)
-                }
-                isLoading = false
-            }
-        case .failure(let error):
-            errorMessage = appleAuthorizationMessage(for: error)
-            return
-        }
-    }
-
     private func completeSignIn() {
         // The auth-state listener triggers the Firestore sync once the session is live.
         onSignedIn()
         dismiss()
-    }
-
-    private func appleAuthorizationMessage(for error: Error) -> String {
-        guard let authorizationError = error as? ASAuthorizationError else {
-            return error.localizedDescription
-        }
-
-        switch authorizationError.code {
-        case .canceled:
-            return localized("已取消 Apple 登錄")
-        case .failed:
-            return localized("Apple 登錄失敗，請稍後再試")
-        case .invalidResponse:
-            return localized("Apple 登錄回應無效")
-        case .notHandled:
-            return localized("Apple 登錄未完成，請重試")
-        case .unknown:
-            return localized("無法完成 Apple 登錄，請確認已開啟 Sign in with Apple 並使用支援的 Apple ID")
-        default:
-            return localized("Apple 登錄失敗")
-        }
     }
 }
 

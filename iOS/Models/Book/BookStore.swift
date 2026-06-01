@@ -1194,7 +1194,7 @@ class BookStore: ObservableObject, BookProvider {
 
     // MARK: - Widget Data Sync
 
-    private static let widgetAppGroupID = "group.com.zhangruilin.yuedureader"
+    private static let widgetAppGroupID = "group.com.mumu.yuedu"
     private static let widgetDataKey = "widget_last_book"
 
     private func syncWidgetData() {

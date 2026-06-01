@@ -1,4 +1,3 @@
-import AuthenticationServices
 import Combine
 import FirebaseAuth
 import Foundation
@@ -13,14 +12,12 @@ final class FirebaseAuthManager: ObservableObject {
     @Published private(set) var uid: String?
     @Published private(set) var isAuthenticated = false
 
-    /// Provider IDs already linked to the current account, e.g. ["google.com", "apple.com", "password"].
+    /// Provider IDs already linked to the current account, e.g. ["google.com", "password"].
     var linkedProviderIDs: [String] {
         currentUser?.providerData.map(\.providerID) ?? []
     }
 
     private var authStateHandle: AuthStateDidChangeListenerHandle?
-    private var currentAppleNonce: String?
-    private var appleReauthCoordinator: AppleReauthCoordinator?
 
     private init() {
         currentUser = Auth.auth().currentUser
@@ -37,13 +34,6 @@ final class FirebaseAuthManager: ObservableObject {
         }
     }
 
-    func prepareAppleRequest(_ request: ASAuthorizationAppleIDRequest) {
-        let nonce = AppleSignInNonce.random()
-        currentAppleNonce = nonce
-        request.requestedScopes = [.fullName, .email]
-        request.nonce = AppleSignInNonce.sha256(nonce)
-    }
-
     // MARK: - Sign in
 
     @discardableResult
@@ -58,41 +48,6 @@ final class FirebaseAuthManager: ObservableObject {
         )
         let authResult = try await Auth.auth().signIn(with: credential)
         GlobalSettings.shared.applyFirebaseUser(authResult.user, providerOverride: "Google")
-        return authResult.user
-    }
-
-    @discardableResult
-    func signInWithApple(credential appleCredential: ASAuthorizationAppleIDCredential) async throws -> User {
-        guard let nonce = currentAppleNonce else {
-            throw AuthFlowError.missingAppleNonce
-        }
-        currentAppleNonce = nil
-
-        guard let tokenData = appleCredential.identityToken,
-              let idToken = String(data: tokenData, encoding: .utf8) else {
-            throw AuthFlowError.missingAppleIDToken
-        }
-
-        let credential = OAuthProvider.appleCredential(
-            withIDToken: idToken,
-            rawNonce: nonce,
-            fullName: appleCredential.fullName
-        )
-        let authResult = try await Auth.auth().signIn(with: credential)
-
-        // Apple only returns the name on the very first authorization; persist it onto
-        // the Firebase profile so it survives future logins.
-        if (authResult.user.displayName ?? "").isEmpty, let fullName = appleCredential.fullName {
-            let formatted = PersonNameComponentsFormatter().string(from: fullName)
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-            if !formatted.isEmpty {
-                let change = authResult.user.createProfileChangeRequest()
-                change.displayName = formatted
-                try? await change.commitChanges()
-            }
-        }
-
-        GlobalSettings.shared.applyFirebaseUser(authResult.user, providerOverride: "Apple")
         return authResult.user
     }
 
@@ -122,27 +77,6 @@ final class FirebaseAuthManager: ObservableObject {
         let credential = GoogleAuthProvider.credential(
             withIDToken: idToken,
             accessToken: result.user.accessToken.tokenString
-        )
-        try await link(user, with: credential)
-    }
-
-    /// Links an Apple identity to the currently signed-in account (same uid).
-    func linkApple() async throws {
-        guard let user = Auth.auth().currentUser else { throw AuthFlowError.missingFirebaseUser }
-        let nonce = AppleSignInNonce.random()
-        let coordinator = AppleReauthCoordinator()
-        appleReauthCoordinator = coordinator
-        defer { appleReauthCoordinator = nil }
-
-        let appleCredential = try await coordinator.requestCredential(nonceSHA256: AppleSignInNonce.sha256(nonce))
-        guard let tokenData = appleCredential.identityToken,
-              let idToken = String(data: tokenData, encoding: .utf8) else {
-            throw AuthFlowError.missingAppleIDToken
-        }
-        let credential = OAuthProvider.appleCredential(
-            withIDToken: idToken,
-            rawNonce: nonce,
-            fullName: appleCredential.fullName
         )
         try await link(user, with: credential)
     }
@@ -184,7 +118,7 @@ final class FirebaseAuthManager: ObservableObject {
         GlobalSettings.shared.clearAccountState()
     }
 
-    /// Deletes the account. Re-authenticates first (interactive for Google/Apple,
+    /// Deletes the account. Re-authenticates first (interactive for Google,
     /// password for Email) so we never wipe cloud data and then fail to delete the
     /// auth user, leaving a half-deleted account.
     func deleteAccount(emailPassword: String? = nil) async throws {
@@ -218,9 +152,6 @@ final class FirebaseAuthManager: ObservableObject {
         case "google.com":
             let credential = try await googleReauthCredential()
             try await user.reauthenticate(with: credential)
-        case "apple.com":
-            let credential = try await appleReauthCredential()
-            try await user.reauthenticate(with: credential)
         case "password":
             guard let email = user.email, let password = emailPassword, !password.isEmpty else {
                 throw AuthFlowError.requiresPassword
@@ -240,24 +171,6 @@ final class FirebaseAuthManager: ObservableObject {
         return GoogleAuthProvider.credential(
             withIDToken: idToken,
             accessToken: result.user.accessToken.tokenString
-        )
-    }
-
-    private func appleReauthCredential() async throws -> AuthCredential {
-        let nonce = AppleSignInNonce.random()
-        let coordinator = AppleReauthCoordinator()
-        appleReauthCoordinator = coordinator
-        defer { appleReauthCoordinator = nil }
-
-        let appleCredential = try await coordinator.requestCredential(nonceSHA256: AppleSignInNonce.sha256(nonce))
-        guard let tokenData = appleCredential.identityToken,
-              let idToken = String(data: tokenData, encoding: .utf8) else {
-            throw AuthFlowError.missingAppleIDToken
-        }
-        return OAuthProvider.appleCredential(
-            withIDToken: idToken,
-            rawNonce: nonce,
-            fullName: appleCredential.fullName
         )
     }
 
@@ -281,8 +194,6 @@ final class FirebaseAuthManager: ObservableObject {
 
 enum AuthFlowError: LocalizedError {
     case missingGoogleIDToken
-    case missingAppleNonce
-    case missingAppleIDToken
     case missingFirebaseUser
     case missingPresenter
     case requiresRecentLogin
@@ -293,10 +204,6 @@ enum AuthFlowError: LocalizedError {
         switch self {
         case .missingGoogleIDToken:
             return localized("Google 登入缺少身份憑證")
-        case .missingAppleNonce:
-            return localized("Apple 登入安全驗證失敗")
-        case .missingAppleIDToken:
-            return localized("Apple 登入缺少身份憑證")
         case .missingFirebaseUser:
             return localized("目前沒有已登入的帳號")
         case .missingPresenter:

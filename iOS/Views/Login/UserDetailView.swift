@@ -1,4 +1,3 @@
-import CloudKit
 import SwiftUI
 import PhotosUI
 import UIKit
@@ -123,7 +122,6 @@ struct UserDetailView: View {
 
                 Section {
                     linkRow(title: "Google", providerID: "google.com")
-                    linkRow(title: "Apple", providerID: "apple.com")
                     linkRow(title: localized("電子郵件"), providerID: "password")
 
                     if let linkErrorMessage {
@@ -289,8 +287,6 @@ struct UserDetailView: View {
         performLink {
             if providerID == "google.com" {
                 try await auth.linkGoogle()
-            } else {
-                try await auth.linkApple()
             }
         }
     }
@@ -343,7 +339,7 @@ struct UserDetailView: View {
 
     private func performAccountDeletion() {
         // Email accounts need the password to re-authenticate before deletion;
-        // Google/Apple re-authenticate interactively inside deleteAccount().
+        // Google re-authenticates interactively inside deleteAccount().
         if FirebaseAuthManager.shared.deletionRequiresPassword {
             showDeletePasswordAlert = true
         } else {
