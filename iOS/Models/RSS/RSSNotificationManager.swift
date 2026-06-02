@@ -1,5 +1,4 @@
 import BackgroundTasks
-import FirebaseCore
 import UIKit
 import UserNotifications
 import os
@@ -179,7 +178,6 @@ final class RSSAppNotificationDelegate: NSObject, UIApplicationDelegate, UNUserN
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        FirebaseApp.configure()
         UNUserNotificationCenter.current().delegate = self
         RSSNotificationManager.shared.start()
         scheduleBackgroundFeedRefresh()

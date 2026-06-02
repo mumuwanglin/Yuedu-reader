@@ -97,5 +97,4 @@ BookSourceFetcher.searchBooks()
 
 - **Readium** (BSD) — EPUB parsing via ReadiumShared, ReadiumStreamer, ReadiumZIPFoundation
 - **SwiftSoup** (MIT) — HTML parsing for RSS and rule engine
-- **GoogleSignIn** (Apache 2.0) — Optional Google account sign-in
 - **Fuzi** — XPath XML querying (via ReadiumFuzi)

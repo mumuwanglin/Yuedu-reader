@@ -195,7 +195,7 @@ struct SettingsView: View {
             AccountAvatarView(size: 50)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(gs.isLoggedIn ? (gs.accountDisplayName.isEmpty ? localized("已登入") : gs.accountDisplayName) : localized("尚未登入"))
+                Text(gs.accountDisplayName.isEmpty ? localized("個人資料") : gs.accountDisplayName)
                     .font(.headline)
                 Text(gs.accountSubtitle)
                     .font(.caption).foregroundColor(.secondary)
