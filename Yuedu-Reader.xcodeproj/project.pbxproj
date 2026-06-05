@@ -91,9 +91,9 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		460D365B2F51C5B8006E774C /* iOS */ = {
+		460D365B2F51C5B8006E774C /* Resources */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = iOS;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		460D36692F51C5B9006E774C /* Tests/iOS */ = {
@@ -112,6 +112,16 @@
 				AA11BB22CC33DD44EE55FF66AA11BB22 /* Exceptions for "Widget" folder in "Yuedu-Reader Widget" target */,
 			);
 			path = Widget;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000001 /* Targets/Yuedu */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Targets/Yuedu;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000002 /* Modules */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Modules;
 			sourceTree = "<group>";
 		};
 		A1BCCA3D5B9C4DD1AFB56B678141488F /* ShareExtension */ = {
@@ -178,11 +188,13 @@
 			path = xcconfig;
 			sourceTree = "<group>";
 		};
-		460D36502F51C5B8006E774C = {
-			isa = PBXGroup;
-			children = (
-				460D365B2F51C5B8006E774C /* iOS */,
-				460D36692F51C5B9006E774C /* Tests/iOS */,
+			460D36502F51C5B8006E774C = {
+				isa = PBXGroup;
+				children = (
+					A10000000000000000000001 /* Targets/Yuedu */,
+					A10000000000000000000002 /* Modules */,
+					460D365B2F51C5B8006E774C /* Resources */,
+					460D36692F51C5B9006E774C /* Tests/iOS */,
 				460D36732F51C5B9006E774C /* Tests/iOS-UI */,
 				501150730FA6492E85D96D0235061651 /* Widget */,
 				A1BCCA3D5B9C4DD1AFB56B678141488F /* ShareExtension */,
@@ -250,7 +262,9 @@
 				8127C833559D43D8BE2E634A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				460D365B2F51C5B8006E774C /* iOS */,
+				460D365B2F51C5B8006E774C /* Resources */,
+				A10000000000000000000001 /* Targets/Yuedu */,
+				A10000000000000000000002 /* Modules */,
 			);
 			name = "yuedu app";
 			packageProductDependencies = (
@@ -651,12 +665,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CODE_SIGN_ENTITLEMENTS = "iOS/Yuedu-Reader.entitlements";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 567F2A94LC;
-				ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING = NO;
+					CODE_SIGN_ENTITLEMENTS = "Resources/Yuedu-Reader.entitlements";
+					"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+					CODE_SIGN_STYLE = Manual;
+					DEVELOPMENT_TEAM = "";
+					"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 567F2A94LC;
+					ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -669,7 +683,8 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -686,7 +701,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "iOS/yuedu app-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Resources/yuedu app-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -701,12 +716,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CODE_SIGN_ENTITLEMENTS = "iOS/Yuedu-Reader.entitlements";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 567F2A94LC;
-				ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING = NO;
+					CODE_SIGN_ENTITLEMENTS = "Resources/Yuedu-Reader.entitlements";
+					"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+					CODE_SIGN_STYLE = Manual;
+					DEVELOPMENT_TEAM = "";
+					"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 567F2A94LC;
+					ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -719,7 +734,8 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -736,7 +752,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "iOS/yuedu app-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Resources/yuedu app-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -749,12 +765,12 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CODE_SIGN_ENTITLEMENTS = "iOS/Yuedu-Reader.entitlements";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 567F2A94LC;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
+					CODE_SIGN_ENTITLEMENTS = "Resources/Yuedu-Reader.entitlements";
+					"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+					CODE_SIGN_STYLE = Manual;
+					DEVELOPMENT_TEAM = "";
+					"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 567F2A94LC;
+					ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mumu.yuedu-appTests";
@@ -764,7 +780,7 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = "iOS/yuedu app-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Resources/yuedu app-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -778,12 +794,12 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CODE_SIGN_ENTITLEMENTS = "iOS/Yuedu-Reader.entitlements";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 567F2A94LC;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
+					CODE_SIGN_ENTITLEMENTS = "Resources/Yuedu-Reader.entitlements";
+					"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+					CODE_SIGN_STYLE = Manual;
+					DEVELOPMENT_TEAM = "";
+					"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 567F2A94LC;
+					ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mumu.yuedu-appTests";
@@ -793,7 +809,7 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = "iOS/yuedu app-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Resources/yuedu app-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -806,12 +822,12 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CODE_SIGN_ENTITLEMENTS = "iOS/Yuedu-Reader.entitlements";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 567F2A94LC;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
+					CODE_SIGN_ENTITLEMENTS = "Resources/Yuedu-Reader.entitlements";
+					"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+					CODE_SIGN_STYLE = Manual;
+					DEVELOPMENT_TEAM = "";
+					"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 567F2A94LC;
+					ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mumu.yuedu-appUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -824,7 +840,7 @@
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = "iOS/yuedu app-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Resources/yuedu app-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -837,12 +853,12 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CODE_SIGN_ENTITLEMENTS = "iOS/Yuedu-Reader.entitlements";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 567F2A94LC;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
+					CODE_SIGN_ENTITLEMENTS = "Resources/Yuedu-Reader.entitlements";
+					"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+					CODE_SIGN_STYLE = Manual;
+					DEVELOPMENT_TEAM = "";
+					"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 567F2A94LC;
+					ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mumu.yuedu-appUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -855,7 +871,7 @@
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OBJC_BRIDGING_HEADER = "iOS/yuedu app-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "Resources/yuedu app-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

@@ -26,12 +26,101 @@ struct ReaderPresentationContractTests {
         #expect(cover.transitionStyle == .scroll)
         #expect(cover.disablesBuiltInSwipe)
         #expect(cover.usesCoverOverlay)
+        #expect(cover.spineLocation(isRTL: true) == .max)
 
         let none = PageViewControllerPagingAdapterDescriptor(pageTurnStyle: .none)
         #expect(none.style == .none)
         #expect(none.transitionStyle == .scroll)
         #expect(none.disablesBuiltInSwipe)
         #expect(!none.usesCoverOverlay)
+    }
+
+    @Test("cover motion mirrors gesture and offscreen edge for RTL")
+    func coverMotionMirrorsGestureAndOffscreenEdgeForRTL() {
+        let width: CGFloat = 320
+
+        #expect(ReaderCoverPageMotion.direction(for: -24, threshold: 18, isRTL: false) == .forward)
+        #expect(ReaderCoverPageMotion.direction(for: 24, threshold: 18, isRTL: false) == .backward)
+        #expect(ReaderCoverPageMotion.direction(for: 24, threshold: 18, isRTL: true) == .forward)
+        #expect(ReaderCoverPageMotion.direction(for: -24, threshold: 18, isRTL: true) == .backward)
+
+        let ltrForward = ReaderCoverPageMotion(direction: .forward, isRTL: false)
+        #expect(ltrForward.initialX(width: width) == 0)
+        #expect(ltrForward.interactiveX(progress: 0.5, width: width) == -160)
+        #expect(ltrForward.settledX(width: width, shouldCommit: true) == -width)
+
+        let rtlForward = ReaderCoverPageMotion(direction: .forward, isRTL: true)
+        #expect(rtlForward.initialX(width: width) == 0)
+        #expect(rtlForward.interactiveX(progress: 0.5, width: width) == 160)
+        #expect(rtlForward.settledX(width: width, shouldCommit: true) == width)
+
+        let rtlBackward = ReaderCoverPageMotion(direction: .backward, isRTL: true)
+        #expect(rtlBackward.initialX(width: width) == width)
+        #expect(rtlBackward.interactiveX(progress: 0.5, width: width) == 160)
+        #expect(rtlBackward.settledX(width: width, shouldCommit: true) == 0)
+    }
+
+    @Test("fixed layout spread pairing honors page-spread sides and center pages")
+    func fixedLayoutSpreadPairingHonorsPageSpreadSidesAndCenterPages() {
+        let chapters = [
+            fixedLayoutChapter(index: 0, spreadSide: .right),
+            fixedLayoutChapter(index: 1, spreadSide: .left),
+            fixedLayoutChapter(index: 2, spreadSide: .right),
+            fixedLayoutChapter(index: 3, spreadSide: .center),
+            fixedLayoutChapter(index: 4, spreadSide: .left)
+        ]
+
+        let ltrPairs = FixedLayoutSpreadPairingBuilder.build(chapters: chapters, isRTL: false)
+
+        #expect(ltrPairs == [
+            FixedLayoutSpreadPair(leftPage: nil, rightPage: 0, isSinglePage: false),
+            FixedLayoutSpreadPair(leftPage: 1, rightPage: 2, isSinglePage: false),
+            FixedLayoutSpreadPair(leftPage: 3, rightPage: nil, isSinglePage: true),
+            FixedLayoutSpreadPair(leftPage: 4, rightPage: nil, isSinglePage: false)
+        ])
+
+        let rtlAutoPairs = FixedLayoutSpreadPairingBuilder.build(
+            chapters: [
+                fixedLayoutChapter(index: 0, spreadSide: .auto),
+                fixedLayoutChapter(index: 1, spreadSide: .auto),
+                fixedLayoutChapter(index: 2, spreadSide: .auto)
+            ],
+            isRTL: true
+        )
+
+        #expect(rtlAutoPairs == [
+            FixedLayoutSpreadPair(leftPage: 1, rightPage: 0, isSinglePage: false),
+            FixedLayoutSpreadPair(leftPage: nil, rightPage: 2, isSinglePage: false)
+        ])
+    }
+
+    @Test("fixed layout zoom metrics fit and center page content")
+    func fixedLayoutZoomMetricsFitAndCenterPageContent() {
+        let pageSize = CGSize(width: 800, height: 600)
+        let availableSize = CGSize(width: 400, height: 600)
+        let fitScale = FixedLayoutZoomMetrics.fitScale(pageSize: pageSize, availableSize: availableSize)
+
+        #expect(fitScale == 0.5)
+
+        let insets = FixedLayoutZoomMetrics.centeredInsets(
+            pageSize: pageSize,
+            boundsSize: availableSize,
+            zoomScale: 0.5
+        )
+
+        #expect(insets.left == 0)
+        #expect(insets.right == 0)
+        #expect(insets.top == 150)
+        #expect(insets.bottom == 150)
+    }
+
+    @Test("reader orientation controller keeps app default narrow and maps FXL orientation")
+    func readerOrientationControllerMapsFixedLayoutOrientation() {
+        #expect(ReaderOrientationController.defaultMask(for: .phone) == .portrait)
+        #expect(ReaderOrientationController.defaultMask(for: .pad) == .all)
+        #expect(ReaderOrientationController.mask(for: .auto) == nil)
+        #expect(ReaderOrientationController.mask(for: .portrait) == .portrait)
+        #expect(ReaderOrientationController.mask(for: .landscape) == .landscape)
     }
 
     @Test("curl virtual indices mirror when RTL uses a right-hand spine")
@@ -103,11 +192,13 @@ struct ReaderPresentationContractTests {
         store.move(to: ReaderLocation(spineIndex: 3, charOffset: 42))
         store.switchPagingStyle(.curl)
         store.updateDirection(.rtl)
+        store.updateSpreadMode(.doublePage)
         store.updateViewport(CGSize(width: 390, height: 844))
 
         #expect(store.state.location == ReaderLocation(spineIndex: 3, charOffset: 42))
         #expect(store.state.pagingStyle == .curl)
         #expect(store.state.direction == .rtl)
+        #expect(store.state.spreadMode == .doublePage)
         #expect(store.state.viewportSize == CGSize(width: 390, height: 844))
     }
 
@@ -121,6 +212,55 @@ struct ReaderPresentationContractTests {
         #expect(location.source == nil)
         #expect(location.isEstimated == false)
         #expect(location.progression == nil)
+    }
+
+    @Test("EPUB TOC selection uses spine index instead of TOC array position")
+    func epubTOCSelectionUsesSpineIndexInsteadOfArrayPosition() {
+        let chapters = [
+            BookChapter(index: 0, title: "Cover", content: ""),
+            BookChapter(index: 4, title: "第一回", content: ""),
+            BookChapter(index: 8, title: "第二回", content: "")
+        ]
+
+        let selected = ReaderTOCSelection.currentChapter(
+            in: chapters,
+            currentSpineIndex: 8,
+            currentCharOffset: 0,
+            anchorOffset: { _ in nil }
+        )
+
+        #expect(selected?.title == "第二回")
+    }
+
+    @Test("EPUB TOC selection advances by in-spine anchors")
+    func epubTOCSelectionAdvancesByInSpineAnchors() {
+        let chapters = [
+            BookChapter(index: 2, title: "第二回", content: "", href: "text/ch2.xhtml"),
+            BookChapter(index: 2, title: "第二回 下", content: "", href: "text/ch2.xhtml", fragment: "part-b"),
+            BookChapter(index: 2, title: "第二回 末", content: "", href: "text/ch2.xhtml", fragment: "part-c")
+        ]
+
+        let selected = ReaderTOCSelection.currentChapter(
+            in: chapters,
+            currentSpineIndex: 2,
+            currentCharOffset: 80,
+            anchorOffset: { chapter in
+                switch chapter.fragment {
+                case "part-b": return 50
+                case "part-c": return 120
+                default: return nil
+                }
+            }
+        )
+
+        #expect(selected?.title == "第二回 下")
+    }
+
+    @Test("EPUB TOC href normalization preserves fragments")
+    func epubTOCHREFNormalizationPreservesFragments() {
+        #expect(PublicationSession.normalizedTOCHREF("text/ch01.xhtml#sec-2") == "text/ch01.xhtml#sec-2")
+        #expect(PublicationSession.normalizedTOCHREF("/OPS/text/ch01.xhtml#sec-2") == "OPS/text/ch01.xhtml#sec-2")
+        #expect(PublicationSession.normalizedTOCHREF("https://example.com/OPS/text/ch01.xhtml#sec-2") == "OPS/text/ch01.xhtml#sec-2")
     }
 
     @Test("navigator owns live location and persists only through its store")
@@ -194,6 +334,9 @@ struct ReaderPresentationContractTests {
         let coordinator = makeSessionCoordinator(bookId: "coordinator-location", positionStore: store)
         let position = CoreTextReadingPosition(spineIndex: 2, charOffset: 64)
 
+        #expect(coordinator.send(.updateSpreadMode(.doublePage)).isEmpty)
+        #expect(coordinator.state.spreadMode == .doublePage)
+
         let effects = coordinator.send(.jumpToPosition(
             position: position,
             pageIndex: 5,
@@ -239,6 +382,19 @@ struct ReaderPresentationContractTests {
             positionStore: positionStore,
             bookId: bookId
         ))
+    }
+
+    private func fixedLayoutChapter(
+        index: Int,
+        spreadSide: FixedLayoutSpreadSide
+    ) -> PublicationChapterDescriptor {
+        PublicationChapterDescriptor(
+            index: index,
+            href: "page\(index).xhtml",
+            title: "Page \(index)",
+            mediaType: "application/xhtml+xml",
+            spreadSide: spreadSide
+        )
     }
 }
 

@@ -121,6 +121,48 @@ struct BookSourceLoginTests {
         #expect(fields.isEmpty)
     }
 
+    @Test("LoginUIField.parse() 容忍單引號 JS 物件字面量（大灰狼聚合源）")
+    func parseSingleQuotedLoginUi() {
+        // 大灰狼/光遇等聚合源的 loginUi 後半段以 JS 物件字面量撰寫（單引號 key/value），
+        // 嚴格 JSONSerialization 會整個解析失敗導致表單空白。寬鬆解析須能還原全部欄位。
+        let json = """
+        [{
+            "name": "邮箱",
+            "type": "text"
+        }, {
+            'name': '密码',
+            'type': 'password'
+        }, {
+            'action': "set_source('番茄')",
+            'name': '番茄',
+            'type': 'button'
+        }, {
+            'action': "login(true)",
+            'name': '登录书源',
+            'type': 'button',
+        }]
+        """
+        let fields = LoginUIField.parse(from: json)
+        #expect(fields.count == 4)
+        #expect(fields[0].name == "邮箱")
+        #expect(fields[1].type == .password)
+        #expect(fields[2].action == "set_source('番茄')")
+        // 含 button 欄位 → 表單會以「完成」取代會誤觸 bare login() 的「確認」。
+        #expect(fields.contains { $0.type == .button })
+    }
+
+    @Test("LoginUIField.parse() 容忍尾逗號")
+    func parseTrailingCommaLoginUi() {
+        let json = """
+        [
+            {"name":"邮箱","type":"text"},
+            {"name":"登录","type":"button","action":"login(true)"},
+        ]
+        """
+        let fields = LoginUIField.parse(from: json)
+        #expect(fields.count == 2)
+    }
+
     @Test("LoginUIField.parse() 只有 text 欄位、無按鈕")
     func parseTextOnly() {
         let json = """
@@ -228,10 +270,47 @@ struct BookSourceLoginTests {
         let sessionId = engine.evaluate("java.getCookie('fanqienovel.com', 'sessionid')")
         #expect(sessionId == "session-for-test")
     }
+
+    @Test("JS bridge 環境判斷優先回傳改版")
+    func jsBridgeCheckEnvPrefersModernEnvironment() {
+        let engine = JSCoreEngine()
+        let env = engine.evaluate("""
+        function checkEnv() {
+            try {
+                if (typeof java.reLoginView == 'function') {
+                    return "改版";
+                }
+            } catch (error) {}
+            try {
+                java.deviceID();
+                return "苹果";
+            } catch (error) {}
+            return "改版";
+        }
+        checkEnv();
+        """)
+
+        #expect(env == "改版")
+    }
 }
 
 @Suite("GuangYuLiveBookSource", .serialized)
 struct GuangYuLiveBookSourceTests {
+
+    @Test("光遇聚合真源：checkEnv 判斷為改版")
+    func guangYuFixtureCheckEnvReportsModernEnvironment() throws {
+        let env = ProcessInfo.processInfo.environment
+        guard let fixturePath = env["YueduLocalBookSourceFixturePath"]
+                ?? env["TEST_RUNNER_YueduLocalBookSourceFixturePath"]
+        else { return }
+
+        let source = try loadGuangYuSource(fixturePath: fixturePath)
+        let engine = JSCoreEngine()
+        engine.bookSource = source
+        configureRuntime(engine, source: source)
+
+        #expect(engine.evaluate("checkEnv()") == "改版")
+    }
 
     @Test("光遇聚合真源：安全按钮、登录、搜索、详情、目录、正文")
     func guangYuLoginSearchAndRead() async throws {
